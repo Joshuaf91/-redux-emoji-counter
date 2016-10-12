@@ -2,92 +2,61 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore } from	'redux';
 
-const mainReducer = (state = [0,0,0], action) => {
+const mainReducer = (state = {"em-100":1,"em---1":0,"em-alien":0}, action) => {
 	switch (action.type){
-		case "addem-100" :
-			var output = state;
-			output[0]++
-			return output;
-		case "removeem-100":
-			var output = state;
-			output[0]--
-			return output;
-		case "addem---1" :
-			var output = state;
-			output[1]++
-			return output;
-		case "removeem---1":
-			output = state;
-			output[1]--
-			return output;
-		case "addem-alien" :
-			var output = state;
-			output[2]++
-			return output;
-		case "removeem-alien":
-			output = state;
-			output[2]--
-			return output;
+		case "add" :
+			state[action.emojiType]++
+			return state
+		case "remove" :
+			state[action.emojiType]--
+			return state
 		default:
 			return state;
 	}
 }
 
-const store = createStore(mainReducer, window.devToolsExtension ? window.devToolsExtension() : undefined);
+const store = createStore(mainReducer,  window.devToolsExtension ? window.devToolsExtension() : undefined);
 
 var App = React.createClass({
-	addEmoji(emojiType){
-		store.dispatch({type: "add"+emojiType});
-	},	
-	removeEmoji(emojiType){
-		store.dispatch({type: "remove"+emojiType});
+	addRemoveEmoji(type, emojiType){
+		store.dispatch({type: type, emojiType: emojiType });
 	},
-	displayEmojiem100(){
-		var arr = []
-		for (var i = 0; i < store.getState()[0]; i++) {
-			arr.push(<i className="em em-100"></i>);
+	display(){
+		var output = [];
+		for(let key in store.getState()){
+			output.push(<EmojiDisplay that={this} emoji={key}/>);
 		}
-		return arr
-	},
-	displayEmojiem1(){
-		var arr = []
-		for (var i = 0; i < store.getState()[1]; i++) {
-			arr.push(<i className="em em---1"></i>);
-		}
-		return arr
-	},
-	displayEmojiemAlien(){
-		var arr = []
-		for (var i = 0; i < store.getState()[2]; i++) {
-			arr.push(<i className="em em-alien"></i>);
-		}
-		return arr
+		return output
 	},
 	render() {
+		console.log(store.getState()['em-alien'])
 		return (
 			<div>
-				<div>
-					<h1>{store.getState()[0]}</h1>
-					<h2>{this.displayEmojiem100()}</h2>
-					<button onClick={this.addEmoji.bind(this, "em-100")}>+<i className="em em-100"></i></button>
-					<button onClick={this.removeEmoji.bind(this, "em-100")}>-<i className="em em-100"></i></button>
-				</div>
-				<div>
-					<h1>{store.getState()[1]}</h1>
-					<h2>{this.displayEmojiem1()}</h2>
-					<button onClick={this.addEmoji.bind(this, "em---1")}>+<i className="em em---1"></i></button>
-					<button onClick={this.removeEmoji.bind(this, "em---1")}>-<i className="em em---1"></i></button>
-				</div>
-				<div>
-					<h1>{store.getState()[2]}</h1>
-					<h2>{this.displayEmojiemAlien()}</h2>
-					<button onClick={this.addEmoji.bind(this, "em-alien")}>+<i className="em em-alien"></i></button>
-					<button onClick={this.removeEmoji.bind(this, "em-alien")}>-<i className="em em-alien"></i></button>
-				</div>
+				{this.display()}
 			</div>
     )
   }
 });
+
+var EmojiDisplay = React.createClass({
+	displayEmoji(){
+		var arr = []
+		for (var i = 0; i < store.getState()[this.props.emoji]; i++) {
+			arr.push(<i className={"em "+this.props.emoji}></i>);
+		}
+		return arr
+	},
+	render(){
+		return(
+			<div>
+				<h1>{store.getState()[this.props.emoji]}</h1>
+				<h2>{this.displayEmoji()}</h2>
+				<button onClick={this.props.that.addRemoveEmoji.bind(this.props.that, "add", this.props.emoji)}>+<i className={"em " + this.props.emoji}></i></button>
+				<button onClick={this.props.that.addRemoveEmoji.bind(this.props.that, "remove", this.props.emoji)}>-<i className={"em "+this.props.emoji}></i></button>
+			</div>
+			)
+	}
+})
 
 const render = () => ReactDOM.render(
   <App />,
